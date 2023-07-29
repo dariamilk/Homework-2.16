@@ -3,8 +3,11 @@ package ru.hogwarts.school.service;
 import org.springframework.stereotype.Service;
 import ru.hogwarts.school.exceptions.FacultyAlreadyExistsException;
 import ru.hogwarts.school.exceptions.NoSuchFacultyException;
+import ru.hogwarts.school.exceptions.NoSuchStudentException;
 import ru.hogwarts.school.model.Faculty;
+import ru.hogwarts.school.model.Student;
 import ru.hogwarts.school.repositories.FacultyRepository;
+import ru.hogwarts.school.repositories.StudentRepository;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -12,9 +15,11 @@ import java.util.stream.Collectors;
 @Service
 public class FacultyService {
     private final FacultyRepository facultyRepository;
+    private final StudentRepository studentRepository;
 
-    public FacultyService (FacultyRepository facultyRepository) {
+    public FacultyService (FacultyRepository facultyRepository, StudentRepository studentRepository) {
         this.facultyRepository = facultyRepository;
+        this.studentRepository = studentRepository;
     }
 
     public Faculty add(Faculty faculty) {
@@ -44,6 +49,15 @@ public class FacultyService {
     }
 
     public Collection<Faculty> getAllByColor (String color) {
-        return facultyRepository.findAllByColor(color).stream().collect(Collectors.toUnmodifiableList());
+        return facultyRepository.findAllByColorIgnoreCase(color).stream().collect(Collectors.toUnmodifiableList());
     }
+
+    public Collection<Faculty> getAllByColorOrName (String color, String name) {
+       return facultyRepository.findAllByColorLikeIgnoreCaseOrNameIgnoreCase(color, name);
+    }
+
+    public Faculty getFacultyByStudentIdIn (Long id) {
+        return studentRepository.findById(id).map(Student::getFaculty).orElseThrow(NoSuchStudentException::new);
+    }
+
 }

@@ -44,4 +44,14 @@ public class StudentController {
     public Collection<Student> getAllByAge (@PathVariable("age") int age) {
         return studentService.getAllByAge(age);
     }
+
+    @GetMapping("/filtered-by-age")
+    public Collection<Student> getAllByAgeBetween (@RequestParam("min") int min, @RequestParam("max") int max) {
+        return studentService.getAllByAgeBetween(min, max);
+    }
+
+    @GetMapping("/find-by-faculty")
+    public Collection<Student> getStudentsByFaculty (Long id) {
+        return studentService.getStudentByFacultyIdIn(id);
+    }
 }
