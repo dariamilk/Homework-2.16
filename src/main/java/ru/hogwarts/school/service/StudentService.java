@@ -1,54 +1,65 @@
 package ru.hogwarts.school.service;
 
 import org.springframework.stereotype.Service;
+import ru.hogwarts.school.exceptions.NoSuchFacultyException;
 import ru.hogwarts.school.exceptions.NoSuchStudentException;
 import ru.hogwarts.school.exceptions.StudentAlreadyExistsException;
+import ru.hogwarts.school.model.Faculty;
 import ru.hogwarts.school.model.Student;
+import ru.hogwarts.school.repositories.FacultyRepository;
+import ru.hogwarts.school.repositories.StudentRepository;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 public class StudentService {
-    private static Long COUNTER = 0L;
-    private Map<Long, Student> storage = new HashMap<>();
+
+    private final StudentRepository studentRepository;
+    private final FacultyRepository facultyRepository;
+
+    public StudentService (StudentRepository studentRepository, FacultyRepository facultyRepository) {
+        this.studentRepository = studentRepository;
+        this.facultyRepository = facultyRepository;
+    }
 
     public Student add(Student student) {
-        if (storage.containsKey(student.getId())) {
+        if (!studentRepository.findAllByNameIgnoreCaseAndAge(student.getName(), student.getAge()).isEmpty()) {
             throw new StudentAlreadyExistsException();
         }
-        Long nextId = COUNTER++;
-        student.setId(nextId);
-        storage.put(nextId, student);
-        return student;
+        return studentRepository.save(student);
     }
 
     public Student update(Long id, Student student) {
-        if (!storage.containsKey(id)) {
-            throw new NoSuchStudentException();
-        }
-        storage.put(id, student);
-        return student;
+        studentRepository.findById(id).orElseThrow(NoSuchStudentException::new);
+        return studentRepository.save(student);
     }
 
     public Student get(Long id) {
-        return storage.get(id);
+        return studentRepository.findById(id).orElseThrow(NoSuchStudentException::new);
     }
 
     public Collection<Student> getAll() {
-        return storage.values();
+        return studentRepository.findAll();
     }
 
     public Student remove (Long id) {
-        if (!storage.containsKey(id)) {
-            throw new NoSuchStudentException();
-        }
-        return storage.remove(id);
+        Student student = studentRepository.findById(id).orElseThrow(NoSuchStudentException::new);
+        studentRepository.deleteById(id);
+        return student;
     }
 
     public Collection<Student> getAllByAge (int age) {
-        return storage.values().stream().filter(e -> e.getAge() == age).collect(Collectors.toList());
+        return studentRepository.findStudentByAge(age).stream().collect(Collectors.toUnmodifiableList());
     }
+
+    public Collection<Student> getAllByAgeBetween (int min, int max) {
+        return studentRepository.findByAgeBetween(min, max).stream().collect(Collectors.toUnmodifiableList());
+    }
+
+    public Collection<Student> getStudentByFacultyIdIn (Long id) {
+        return facultyRepository.findById(id).map(Faculty::getStudents).orElseThrow(NoSuchFacultyException::new);
+    }
+
+
 }
