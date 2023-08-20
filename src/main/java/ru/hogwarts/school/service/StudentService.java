@@ -61,5 +61,15 @@ public class StudentService {
         return facultyRepository.findById(id).map(Faculty::getStudents).orElseThrow(NoSuchFacultyException::new);
     }
 
+    public Long countAllStudents() {
+        return studentRepository.countAllStudents();
+    }
 
+    public Double findAverageAge() {
+        return studentRepository.findAverageAge();
+    }
+
+    public Collection<Student> findLastStudents() {
+        return studentRepository.findLastStudents();
+    }
 }

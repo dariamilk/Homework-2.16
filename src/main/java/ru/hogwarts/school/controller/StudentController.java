@@ -70,4 +70,19 @@ public class StudentController {
             throw new RuntimeException(e);
         }
     }
+
+    @GetMapping("/count")
+    public Long countAllStudents() {
+        return studentService.countAllStudents();
+    }
+
+    @GetMapping("/average-age")
+    public Double findAverageAge() {
+        return studentService.findAverageAge();
+    }
+
+    @GetMapping("/last-students")
+    public Collection<Student> findLastStudents() {
+        return studentService.findLastStudents();
+    }
 }

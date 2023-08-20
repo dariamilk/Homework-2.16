@@ -4,10 +4,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import ru.hogwarts.school.dto.AvatarDTO;
 import ru.hogwarts.school.model.Avatar;
 import ru.hogwarts.school.service.AvatarService;
 import ru.hogwarts.school.service.StudentService;
@@ -18,6 +16,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 @RestController
 @RequestMapping("/avatar")
@@ -53,6 +52,11 @@ public class AvatarController {
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
+    }
+
+    @GetMapping("/page-of-avatars")
+    public List<AvatarDTO> getPage(@RequestParam int num) {
+        return avatarService.getPage(num);
     }
 
 }
