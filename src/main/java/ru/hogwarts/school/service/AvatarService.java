@@ -2,8 +2,11 @@ package ru.hogwarts.school.service;
 
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriComponentsBuilder;
+import ru.hogwarts.school.dto.AvatarDTO;
 import ru.hogwarts.school.exceptions.NoAvatarException;
 import ru.hogwarts.school.exceptions.NoSuchStudentException;
 import ru.hogwarts.school.model.Avatar;
@@ -12,8 +15,11 @@ import ru.hogwarts.school.repositories.AvatarRepository;
 import ru.hogwarts.school.repositories.StudentRepository;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 
@@ -23,6 +29,12 @@ public class AvatarService {
 
     @Value("${path.to.avatars.folder}")
     private Path avatarPath;
+
+    @Value("${server.port}")
+    private String port;
+
+    @Value("${server.address}")
+    private String host;
     private final AvatarRepository avatarRepository;
     private final StudentRepository studentRepository;
 
@@ -66,8 +78,25 @@ public class AvatarService {
             avatarRepository.save(avatar);
             return avatar.getId();
         }
-
     }
 
+    public List<AvatarDTO> getPage (int num) {
+        return avatarRepository.findAll(PageRequest.of(num, 1)).getContent().stream().map(avatar -> {
+            try {
+                return new AvatarDTO(avatar.getId(),
+                        UriComponentsBuilder.newInstance()
+                                .scheme("http")
+                                .host(host)
+                                .port(port)
+                                .path("/avatar/" + avatar.getId() + "/avatar-from-db")
+                                .build()
+                                .toUri()
+                                .toURL(),
+                        avatar.getStudent().getId(), avatar.getStudent().getName());
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        }).collect(Collectors.toList());
+    }
 
 }
