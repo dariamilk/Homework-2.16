@@ -22,7 +22,7 @@ public class StudentService {
 
     private final Logger logger = LoggerFactory.getLogger(StudentService.class);
 
-    public StudentService (StudentRepository studentRepository, FacultyRepository facultyRepository) {
+    public StudentService(StudentRepository studentRepository, FacultyRepository facultyRepository) {
         this.studentRepository = studentRepository;
         this.facultyRepository = facultyRepository;
     }
@@ -52,24 +52,24 @@ public class StudentService {
         return studentRepository.findAll();
     }
 
-    public Student remove (Long id) {
+    public Student remove(Long id) {
         logger.info("Was invoked method to remove student");
         Student student = studentRepository.findById(id).orElseThrow(NoSuchStudentException::new);
         studentRepository.deleteById(id);
         return student;
     }
 
-    public Collection<Student> getAllByAge (int age) {
+    public Collection<Student> getAllByAge(int age) {
         logger.info("Was invoked method to get all students by age");
         return studentRepository.findStudentByAge(age).stream().collect(Collectors.toUnmodifiableList());
     }
 
-    public Collection<Student> getAllByAgeBetween (int min, int max) {
+    public Collection<Student> getAllByAgeBetween(int min, int max) {
         logger.info("Was invoked method to all students by age between");
         return studentRepository.findByAgeBetween(min, max).stream().collect(Collectors.toUnmodifiableList());
     }
 
-    public Collection<Student> getStudentByFacultyIdIn (Long id) {
+    public Collection<Student> getStudentByFacultyIdIn(Long id) {
         logger.info("Was invoked method to get student by faculty ID");
         return facultyRepository.findById(id).map(Faculty::getStudents).orElseThrow(NoSuchFacultyException::new);
     }
@@ -87,5 +87,19 @@ public class StudentService {
     public Collection<Student> findLastStudents() {
         logger.info("Was invoked method to find last added students");
         return studentRepository.findLastStudents();
+    }
+
+    public Collection<String> findAllStudentByFirstLetterInName(char ch) {
+        logger.info("Was invoked method to find all added students with first letter " + ch + " in name");
+        return studentRepository.findAll().stream().map(Student::getName)
+                .filter(n -> n.toUpperCase().charAt(0) == Character.toUpperCase(ch))
+                .sorted()
+                .map(String::toUpperCase)
+                .collect(Collectors.toList());
+    }
+
+    public Double findAverageAgeUsingStream() {
+        logger.info("Was invoked method to find all average age of students using stream");
+        return studentRepository.findAll().stream().map(Student::getAge).mapToInt(c -> c).average().getAsDouble();
     }
 }
