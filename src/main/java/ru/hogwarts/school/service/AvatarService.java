@@ -1,6 +1,8 @@
 package ru.hogwarts.school.service;
 
 import org.apache.commons.io.FilenameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -38,16 +40,20 @@ public class AvatarService {
     private final AvatarRepository avatarRepository;
     private final StudentRepository studentRepository;
 
+    private final Logger logger = LoggerFactory.getLogger(AvatarService.class);
+
     public AvatarService (AvatarRepository avatarRepository, StudentRepository studentRepository) {
         this.avatarRepository = avatarRepository;
         this.studentRepository = studentRepository;
     }
 
     public Avatar findById (Long id) {
+        logger.info("Was invoked method to find avatar by ID");
         return avatarRepository.findById(id).orElseThrow(NoAvatarException::new);
     }
 
     public Long addAvatar (Long id, MultipartFile multipartFile) throws IOException {
+        logger.info("Was invoked method to add avatar");
         Student student = studentRepository.findById(id).orElseThrow(NoSuchStudentException::new);
         Path filePath = Path.of(avatarPath.toString(), student + "." + FilenameUtils.getExtension(multipartFile.getOriginalFilename()));
         Files.createDirectories(filePath.getParent());
@@ -81,6 +87,7 @@ public class AvatarService {
     }
 
     public List<AvatarDTO> getPage (int num) {
+        logger.info("Was invoked method to get page with avatars");
         return avatarRepository.findAll(PageRequest.of(num, 1)).getContent().stream().map(avatar -> {
             try {
                 return new AvatarDTO(avatar.getId(),
@@ -94,6 +101,7 @@ public class AvatarService {
                                 .toURL(),
                         avatar.getStudent().getId(), avatar.getStudent().getName());
             } catch (MalformedURLException e) {
+                logger.error("Cannot build URL for avatar with ID = " + avatar.getId());
                 throw new RuntimeException(e.getMessage());
             }
         }).collect(Collectors.toList());
