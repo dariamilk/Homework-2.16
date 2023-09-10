@@ -95,4 +95,13 @@ public class StudentController {
     public Double findAverageAgeUsingStream() {
        return studentService.findAverageAgeUsingStream();
     }
+
+    @GetMapping("/thread-test-async")
+    public void getNamesUsingThreadsAsync() {
+        studentService.getNamesUsingThreadsAsync();
+    }
+    @GetMapping("/thread-test-sync")
+    public void getNamesUsingThreadsSync() {
+        studentService.getNamesUsingThreadsSync();
+    }
 }
