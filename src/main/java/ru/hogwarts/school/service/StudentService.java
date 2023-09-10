@@ -12,6 +12,7 @@ import ru.hogwarts.school.repositories.FacultyRepository;
 import ru.hogwarts.school.repositories.StudentRepository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -101,5 +102,41 @@ public class StudentService {
     public Double findAverageAgeUsingStream() {
         logger.info("Was invoked method to find all average age of students using stream");
         return studentRepository.findAll().stream().map(Student::getAge).mapToInt(c -> c).average().getAsDouble();
+    }
+
+    public void getNamesUsingThreadsAsync() {
+        List<String> studentNames = studentRepository.findAll().stream().map(Student::getName).collect(Collectors.toList());
+        System.out.println(studentNames.get(0));
+        System.out.println(studentNames.get(1));
+
+        new Thread(() -> {
+            System.out.println(studentNames.get(2));
+            System.out.println(studentNames.get(3));
+        }).start();
+
+        new Thread(() -> {
+            System.out.println(studentNames.get(4));
+            System.out.println(studentNames.get(5));
+        }).start();
+    }
+
+    public void getNamesUsingThreadsSync() {
+        List<String> studentNames = studentRepository.findAll().stream().map(Student::getName).collect(Collectors.toList());
+        printSync(studentNames.get(0));
+        printSync(studentNames.get(1));
+
+        new Thread(() -> {
+            printSync(studentNames.get(2));
+            printSync(studentNames.get(3));
+        }).start();
+
+        new Thread(() -> {
+            printSync(studentNames.get(4));
+            printSync(studentNames.get(5));
+        }).start();
+    }
+
+    private synchronized void printSync (String name) {
+        System.out.println(name);
     }
 }
