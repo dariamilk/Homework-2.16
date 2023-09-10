@@ -85,4 +85,14 @@ public class StudentController {
     public Collection<Student> findLastStudents() {
         return studentService.findLastStudents();
     }
+
+    @GetMapping("/student-by-fist-character-in-name")
+    public Collection<String> findAllStudentByFirstLetterInName(char ch) {
+        return studentService.findAllStudentByFirstLetterInName(ch);
+    }
+
+    @GetMapping("/average-age-by-stream")
+    public Double findAverageAgeUsingStream() {
+       return studentService.findAverageAgeUsingStream();
+    }
 }
